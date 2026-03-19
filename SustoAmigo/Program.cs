@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
+using SustoAmigo.Configuracoes;
 
 namespace SustoAmigo
 {
@@ -14,11 +15,12 @@ namespace SustoAmigo
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            FrmConfiguracao frmConfiguracao = new FrmConfiguracao();
-            frmConfiguracao.ShowDialog();
-
-            if (frmConfiguracao.booIniciadoPorConfiguracao)
-                Application.Run(new Principal());
+            using (var frmConfiguracao = new FrmConfiguracao())
+            {
+                frmConfiguracao.ShowDialog();
+                if (frmConfiguracao.IniciadoPorConfiguracao)
+                    Application.Run(new Principal());
+            }
         }
     }
 }
