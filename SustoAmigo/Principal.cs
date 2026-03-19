@@ -1,172 +1,155 @@
 ﻿using System;
 using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Windows.Forms;
-using WMPLib; // importante: adicionar referência ao Windows Media Player
+using SustoAmigo.Configuracoes;
+using SustoAmigo.Interfaces;
+using SustoAmigo.Services;
 
 namespace SustoAmigo
 {
-    public partial class Principal : Form
+    public partial class Principal : Form, IDisposable
     {
-        #region Atributos
-
-        private Timer _tmrRepeatTimer;
-        private WindowsMediaPlayer _wmpPlayer;
+        private readonly IMediaService _mediaService;
+        private readonly IConfigService _configuracao;
         private RedeController _redeController;
+        private Timer _tmrRepeatTimer;
+        private Timer _tmrResetTimer;
+        private bool _disposed;
 
-        #endregion Atributos
+        public Principal() : this(new MediaService(), ConfiguracaoXml.Instancia) { }
 
-        #region Construtores
-
-        public Principal()
+        public Principal(IMediaService mediaService, IConfigService configuracao)
         {
+            _mediaService = mediaService;
+            _configuracao = configuracao;
+
             InitializeComponent();
-
-            this.Iniciar();
+            Iniciar();
         }
-
-        #endregion Construtores
-
-        #region Métodos
 
         private void Iniciar()
         {
-            this._redeController = new RedeController();
+            _redeController = new RedeController();
 
-            if (ConfiguracaoXML.i.booModoRede)
+            if (_configuracao.ModoRede)
             {
-                // Servidor
-                this._redeController.OnReceberComando += () =>
-                {
-                    this.Invoke((MethodInvoker)(() =>
-                    {
-                        this.Show();
-                        Carregar();
-                    }));
-                };
-
-                this._redeController.IniciarServidor(ConfiguracaoXML.i.intPorta);
+                ConfigurarModoRede();
             }
             else
             {
-                // Modo intervalo
-                this._tmrRepeatTimer = new Timer();
-                this._tmrRepeatTimer.Interval = ConfiguracaoXML.i.intIntervaloExecucao * 1000;
-                this._tmrRepeatTimer.Tick += this.RepeatTimer_Tick;
-                this._tmrRepeatTimer.Start();
+                ConfigurarModoAutomatico();
             }
+        }
+
+        private void ConfigurarModoRede()
+        {
+            _redeController.OnReceberComando += () =>
+            {
+                this.Invoke((MethodInvoker)(() =>
+                {
+                    Show();
+                    Carregar();
+                }));
+            };
+
+            _redeController.IniciarServidor(_configuracao.Porta);
+        }
+
+        private void ConfigurarModoAutomatico()
+        {
+            _tmrRepeatTimer = new Timer
+            {
+                Interval = _configuracao.IntervaloExecucao * 1000
+            };
+            _tmrRepeatTimer.Tick += RepeatTimer_Tick;
+            _tmrRepeatTimer.Start();
         }
 
         private void RepeatTimer_Tick(object sender, EventArgs e)
         {
-            this.Show();
-            this.Carregar();
+            Show();
+            Carregar();
         }
 
-        private void Carregar()
+        private async void Carregar()
         {
-            this.CarregarSom();
-            this.CarregarImagem();
+            _tmrResetTimer?.Stop();
+            _tmrResetTimer?.Dispose();
 
-            var tmrResetTimer = new Timer();
-            tmrResetTimer.Interval = ConfiguracaoXML.i.intTempoExibicao * 1000;
+            _mediaService.PararSom();
 
-            tmrResetTimer.Tick += (s, ev) =>
+            var pastaUploads = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "uploads");
+            var pastaImagens = Path.Combine(Application.StartupPath, "Imagens");
+            var pastaSons = Path.Combine(Application.StartupPath, "Sons");
+
+            var caminhoImagem = await _mediaService.CarregarImagemAsync(
+                pastaUploads, pastaImagens, _configuracao.ImagemSelecionada);
+
+            var caminhoSom = await _mediaService.CarregarSomAsync(
+                pastaUploads, pastaSons, _configuracao.SomSelecionado);
+
+            ExibirImagem(caminhoImagem);
+            _mediaService.ReproduzirSom(caminhoSom);
+
+            _tmrResetTimer = new Timer();
+            _tmrResetTimer.Interval = _configuracao.TempoExibicao * 1000;
+            _tmrResetTimer.Tick += (s, ev) =>
             {
-                tmrResetTimer.Stop();
-                this._wmpPlayer?.controls.stop();
-                this.Hide();
+                _tmrResetTimer.Stop();
+                _mediaService.PararSom();
+                Hide();
             };
-
-            tmrResetTimer.Start();
+            _tmrResetTimer.Start();
         }
 
-        private void CarregarImagem()
+        private void ExibirImagem(string caminhoImagem)
         {
-            string strPastaImagens = Path.Combine(Application.StartupPath, "Imagens");
-
-            if (Directory.Exists(strPastaImagens) && Directory.GetFiles(strPastaImagens).Length > 0)
+            if (string.IsNullOrEmpty(caminhoImagem) || !File.Exists(caminhoImagem))
             {
-                string strArquivoImagem = null;
-
-                if (!string.IsNullOrEmpty(ConfiguracaoXML.i.strImagemSelecionada))
-                {
-                    strArquivoImagem = Path.Combine(strPastaImagens, ConfiguracaoXML.i.strImagemSelecionada);
-                    if (!File.Exists(strArquivoImagem))
-                    {
-                        strArquivoImagem = Directory.GetFiles(strPastaImagens).First();
-                    }
-                }
-                else
-                {
-                    strArquivoImagem = Directory.GetFiles(strPastaImagens).First();
-                }
-
-                this.picFoto.SizeMode = PictureBoxSizeMode.Zoom;
-                this.picFoto.Image = Image.FromFile(strArquivoImagem);
-                this.picFoto.Visible = true;
+                picFoto.SizeMode = PictureBoxSizeMode.Zoom;
+                picFoto.Image = Properties.Resources.imgSusto;
+                picFoto.Visible = true;
+                return;
             }
-            else
+
+            using (var imagem = Image.FromFile(caminhoImagem))
             {
-                Properties.Resources.imgSusto.MakeTransparent(Color.White);
-                this.picFoto.SizeMode = PictureBoxSizeMode.Zoom;
-                this.picFoto.Image = Properties.Resources.imgSusto;
-                this.picFoto.Visible = true;
+                picFoto.SizeMode = PictureBoxSizeMode.Zoom;
+                picFoto.Image = new Bitmap(imagem);
+                picFoto.Visible = true;
             }
         }
-
-        private void CarregarSom()
-        {
-            string strPastaSons = Path.Combine(Application.StartupPath, "Sons");
-            string strArquivoSom = null;
-
-            if (!string.IsNullOrEmpty(ConfiguracaoXML.i.strSomSelecionado))
-            {
-                strArquivoSom = Path.Combine(strPastaSons, ConfiguracaoXML.i.strSomSelecionado);
-                if (!File.Exists(strArquivoSom))
-                {
-                    strArquivoSom = Directory.GetFiles(strPastaSons, "*").FirstOrDefault();
-                }
-            }
-            else
-            {
-                strArquivoSom = Directory.GetFiles(strPastaSons, "*").FirstOrDefault();
-            }
-
-            this._wmpPlayer = new WindowsMediaPlayer();
-
-            if (!string.IsNullOrEmpty(strArquivoSom))
-            {
-                this._wmpPlayer.URL = strArquivoSom;
-                this._wmpPlayer.controls.play();
-            }
-            else
-            {
-                // fallback para recurso padrão (som embutido)
-                string strTempFile = Path.Combine(Path.GetTempPath(), "grito.wav");
-
-                using (var resourceStream = Properties.Resources.Grito)
-                using (var fileStream = new FileStream(strTempFile, FileMode.Create, FileAccess.Write))
-                {
-                    resourceStream.CopyTo(fileStream); // copia o conteúdo do recurso para o arquivo
-                }
-
-                this._wmpPlayer.URL = strTempFile;
-                this._wmpPlayer.controls.play();
-            }
-        }
-
-        #endregion Métodos
-
-        #region Eventos
 
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            this.Hide();
+            Hide();
         }
 
-        #endregion Eventos
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            base.OnFormClosing(e);
+            _tmrRepeatTimer?.Stop();
+            _tmrResetTimer?.Stop();
+            _redeController?.PararServidor();
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    components?.Dispose();
+                    _tmrRepeatTimer?.Dispose();
+                    _tmrResetTimer?.Dispose();
+                    _redeController?.Dispose();
+                    (_mediaService as IDisposable)?.Dispose();
+                }
+                _disposed = true;
+            }
+            base.Dispose(disposing);
+        }
     }
 }
