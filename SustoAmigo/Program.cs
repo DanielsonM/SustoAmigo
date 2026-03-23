@@ -1,6 +1,10 @@
-﻿using System;
+﻿using SustoAmigo.Configuracoes;
+using SustoAmigo.Interfaces;
+using SustoAmigo.Services;
+using System;
+using System.IO;
 using System.Windows.Forms;
-using SustoAmigo.Configuracoes;
+using System.Xml.Linq;
 
 namespace SustoAmigo
 {
@@ -18,8 +22,23 @@ namespace SustoAmigo
             using (var frmConfiguracao = new FrmConfiguracao())
             {
                 frmConfiguracao.ShowDialog();
-                if (frmConfiguracao.IniciadoPorConfiguracao)
-                    Application.Run(new Principal());
+
+                
+                    var configuracao = ConfiguracaoXml.Instancia;
+                    var redeController = new RedeController();
+
+                    if (configuracao.ModoRede)
+                    {
+                        string strArquivo = "Configuracao.xml";
+                        string caminhoArquivo = Path.Combine(Application.StartupPath, strArquivo);
+                        var doc = XDocument.Load(caminhoArquivo);
+                        var root = doc.Root;
+                        int porta = ConfiguracaoXml.ObterValorInteiro(root, "Porta", 5000);
+                        redeController.IniciarServidorHttp(porta);
+                    }
+
+                    Application.Run(new Principal(new MediaService(), configuracao, redeController));
+                
             }
         }
     }

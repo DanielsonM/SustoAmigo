@@ -22,7 +22,6 @@ namespace SustoAmigo.Configuracoes
             base.Dispose(disposing);
         }
 
-        #region Windows Form Designer generated code
 
         /// <summary>
         ///  Required method for Designer support - do not modify
@@ -165,7 +164,7 @@ namespace SustoAmigo.Configuracoes
             this.lblIpVitima.Name = "lblIpVitima";
             this.lblIpVitima.Size = new System.Drawing.Size(67, 13);
             this.lblIpVitima.TabIndex = 14;
-            this.lblIpVitima.Text = "IP da vítima:";
+            this.lblIpVitima.Text = "IP da v�tima:";
             // 
             // lblPortaDeAcesso
             // 
@@ -180,10 +179,12 @@ namespace SustoAmigo.Configuracoes
             // 
             this.txtIpVitima.Font = new System.Drawing.Font("Arial", 9F);
             this.txtIpVitima.Location = new System.Drawing.Point(9, 72);
-            this.txtIpVitima.Mask = "000.000.0.000";
+            this.txtIpVitima.Mask = "000.00.0.0";
             this.txtIpVitima.Name = "txtIpVitima";
             this.txtIpVitima.Size = new System.Drawing.Size(103, 21);
             this.txtIpVitima.TabIndex = 16;
+            this.txtIpVitima.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtIpVitima_KeyDown);
+            this.txtIpVitima.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtIpVitima_KeyPress);
             // 
             // btnCarregarImagem
             // 
@@ -231,7 +232,7 @@ namespace SustoAmigo.Configuracoes
             this.lblTempoExibicao.Name = "lblTempoExibicao";
             this.lblTempoExibicao.Size = new System.Drawing.Size(100, 13);
             this.lblTempoExibicao.TabIndex = 2;
-            this.lblTempoExibicao.Text = "Tempo de exibição:";
+            this.lblTempoExibicao.Text = "Tempo de exibi��o:";
             // 
             // lblTempoIntervalo
             // 
@@ -260,7 +261,7 @@ namespace SustoAmigo.Configuracoes
             this.rdbModoAutomatico.Size = new System.Drawing.Size(107, 17);
             this.rdbModoAutomatico.TabIndex = 13;
             this.rdbModoAutomatico.TabStop = true;
-            this.rdbModoAutomatico.Text = "Modo automático";
+            this.rdbModoAutomatico.Text = "Modo autom�tico";
             this.rdbModoAutomatico.UseVisualStyleBackColor = true;
             // 
             // rdbModoRede
@@ -298,7 +299,6 @@ namespace SustoAmigo.Configuracoes
 
         }
 
-        #endregion
 
         private Panel pnlPrincipal;
         private Panel pnlModoRede;
@@ -323,3 +323,4 @@ namespace SustoAmigo.Configuracoes
         private Button btnPlayer;
     }
 }
+

@@ -1,4 +1,9 @@
-﻿using System;
+﻿using SustoAmigo.Configuracoes;
+using SustoAmigo.Dto;
+using SustoAmigo.Interfaces;
+using SustoAmigo.Services;
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -6,10 +11,6 @@ using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using SustoAmigo.Configuracoes;
-using SustoAmigo.Dto;
-using SustoAmigo.Interfaces;
-using SustoAmigo.Services;
 
 namespace SustoAmigo
 {
@@ -29,6 +30,49 @@ namespace SustoAmigo
             _uploadHandler = uploadHandler;
         }
 
+        // ... (mantém os métodos IniciarServidor e IniciarServidorHttp iguais)
+
+        private void ProcessarRequisicao(HttpListenerContext context)
+        {
+            var path = context.Request.Url.AbsolutePath.ToLower();
+
+            if (path == "/config")
+                ProcessarConfiguracao(context);
+            else if (path.StartsWith("/upload"))
+                ProcessarUpload(context, path);
+            else if (path == "/comando")
+                ProcessarComando(context);
+            else
+                Responder(context, 400, "Endpoint inválido");
+        }
+
+        private void ProcessarComando(HttpListenerContext context)
+        {
+            try
+            {
+                using (var reader = new StreamReader(context.Request.InputStream))
+                {
+                    var body = reader.ReadToEnd();
+                    var json = JsonSerializer.Deserialize<Dictionary<string, string>>(body);
+
+                    if (json != null && json.TryGetValue("acao", out var acao))
+                    {
+                        if (acao == "SUSTO")
+                        {
+                            OnReceberComando?.Invoke();
+                            Responder(context, 200, "Comando SUSTO recebido!");
+                            return;
+                        }
+                    }
+                }
+
+                Responder(context, 400, "Comando inválido");
+            }
+            catch (Exception ex)
+            {
+                Responder(context, 500, $"Erro ao processar comando: {ex.Message}");
+            }
+        }
         public void IniciarServidor(int porta)
         {
             Task.Run(() =>
@@ -91,24 +135,7 @@ namespace SustoAmigo
             });
         }
 
-        private void ProcessarRequisicao(HttpListenerContext context)
-        {
-            var path = context.Request.Url.AbsolutePath.ToLower();
-
-            if (path == "/config")
-            {
-                ProcessarConfiguracao(context);
-            }
-            else if (path.StartsWith("/upload"))
-            {
-                ProcessarUpload(context, path);
-            }
-            else
-            {
-                Responder(context, 400, "Endpoint inválido");
-            }
-        }
-
+  
         private void ProcessarConfiguracao(HttpListenerContext context)
         {
             try
@@ -116,6 +143,13 @@ namespace SustoAmigo
                 using (var reader = new StreamReader(context.Request.InputStream))
                 {
                     var body = reader.ReadToEnd();
+
+                    if (string.IsNullOrWhiteSpace(body))
+                    {
+                        Responder(context, 400, "Nenhum JSON enviado");
+                        return;
+                    }
+
                     var valores = JsonSerializer.Deserialize<ConfigDto>(body);
 
                     ConfiguracaoXml.Instancia.Salvar(
@@ -136,6 +170,7 @@ namespace SustoAmigo
                 Responder(context, 500, $"Erro ao salvar configuração: {ex.Message}");
             }
         }
+
 
         private void ProcessarUpload(HttpListenerContext context, string path)
         {

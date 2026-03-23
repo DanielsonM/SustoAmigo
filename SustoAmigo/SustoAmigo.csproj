@@ -1,4 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- ============================================ -->
+  <!-- PROPRIEDADES DO PROJETO                      -->
+  <!-- ============================================ -->
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net472</TargetFramework>
@@ -11,12 +15,18 @@
     <LangVersion>10.0</LangVersion>
   </PropertyGroup>
 
+  <!-- ============================================ -->
+  <!-- PACOTES NUGET                                -->
+  <!-- ============================================ -->
   <ItemGroup>
     <PackageReference Include="System.Resources.Extensions" Version="10.0.0" />
     <PackageReference Include="System.Text.Json" Version="10.0.5" />
     <PackageReference Include="WMPLib" Version="1.0.0" />
   </ItemGroup>
 
+  <!-- ============================================ -->
+  <!-- ARQUIVOS EXCLUÍDOS DA COMPILAÇÃO             -->
+  <!-- ============================================ -->
   <ItemGroup>
     <Compile Remove="ConfiguracaoXML.cs" />
     <Compile Remove="FrmConfiguracao.cs" />
@@ -24,6 +34,9 @@
     <EmbeddedResource Remove="FrmConfiguracao.resx" />
   </ItemGroup>
 
+  <!-- ============================================ -->
+  <!-- ARQUIVOS DE RECURSO                          -->
+  <!-- ============================================ -->
   <ItemGroup>
     <None Update="ico.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -32,4 +45,5 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+
 </Project>

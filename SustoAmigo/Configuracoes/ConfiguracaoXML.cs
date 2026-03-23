@@ -100,7 +100,7 @@ namespace SustoAmigo.Configuracoes
             doc.Save(_caminhoArquivo);
         }
 
-        private static int ObterValorInteiro(XElement root, string elemento, int valorPadrao)
+        public static int ObterValorInteiro(XElement root, string elemento, int valorPadrao)
         {
             var elem = root.Element(elemento);
             return elem != null && int.TryParse(elem.Value, out int valor) ? valor : valorPadrao;

@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Windows.Forms;
 using SustoAmigo.Interfaces;
 
 namespace SustoAmigo.Services
@@ -103,13 +104,17 @@ namespace SustoAmigo.Services
 
         private string SalvarArquivo(byte[] bytesArquivo, string extensao)
         {
-            var pastaUploads = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, PASTA_UPLOADS);
+            var pastaUploads = Path.Combine(Application.StartupPath, PASTA_UPLOADS);
             if (!Directory.Exists(pastaUploads))
                 Directory.CreateDirectory(pastaUploads);
 
             var nomeUnico = $"{Guid.NewGuid()}{extensao}";
             var caminhoArquivo = Path.Combine(pastaUploads, nomeUnico);
             File.WriteAllBytes(caminhoArquivo, bytesArquivo);
+
+            System.Diagnostics.Debug.WriteLine($"[UploadHandler] Arquivo salvo: {caminhoArquivo}");
+            System.Diagnostics.Debug.WriteLine($"[UploadHandler] pastaUploads: {pastaUploads}");
+            System.Diagnostics.Debug.WriteLine($"[UploadHandler] nomeUnico: {nomeUnico}");
 
             return caminhoArquivo;
         }

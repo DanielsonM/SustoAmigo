@@ -145,7 +145,7 @@ namespace SustoAmigo.Configuracoes
                 }
                 else
                 {
-                    MessageBox.Show("Nenhum arquivo de áudio encontrado.");
+                    MessageBox.Show("Nenhum arquivo de �udio encontrado.");
                 }
             }
             else
@@ -186,13 +186,13 @@ namespace SustoAmigo.Configuracoes
             if (modoRede)
             {
                 if (string.IsNullOrEmpty(txtPorta.Text))
-                    throw new Exception("Campo PORTA não pode estar vazio.");
+                    throw new Exception("Campo PORTA n�o pode estar vazio.");
 
                 if (string.IsNullOrEmpty(txtIpVitima.Text))
-                    throw new Exception("Campo IP não pode estar vazio.");
+                    throw new Exception("Campo IP n�o pode estar vazio.");
 
                 porta = int.Parse(txtPorta.Text);
-                ipServidor = txtIpVitima.Text;
+                ipServidor = txtIpVitima.Text.Replace(",", ".");
             }
 
             var imagem = cmbImagens.SelectedItem?.ToString();
@@ -200,12 +200,11 @@ namespace SustoAmigo.Configuracoes
 
             _configService.Salvar(intervalo, tempoExibicao, modoRede, porta, ipServidor, imagem, som);
 
-            MessageBox.Show("Configurações salvas com sucesso!");
+            MessageBox.Show("Configura��es salvas com sucesso!");
             IniciadoPorConfiguracao = true;
             Close();
         }
 
-        #region Eventos
 
         private void btnCarregarImagem_Click(object sender, EventArgs e)
         {
@@ -237,7 +236,7 @@ namespace SustoAmigo.Configuracoes
         {
             using (var ofd = new OpenFileDialog())
             {
-                ofd.Filter = "Arquivos de Áudio|*.wav;*.mp3;*.wma;*.aac;*.flac";
+                ofd.Filter = "Arquivos de �udio|*.wav;*.mp3;*.wma;*.aac;*.flac";
                 if (ofd.ShowDialog() == DialogResult.OK)
                 {
                     var destino = Path.Combine(_pastaSons, Path.GetFileName(ofd.FileName));
@@ -272,7 +271,7 @@ namespace SustoAmigo.Configuracoes
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erro ao salvar configurações: {ex.Message}");
+                MessageBox.Show($"Erro ao salvar configura��es: {ex.Message}");
             }
         }
 
@@ -287,6 +286,18 @@ namespace SustoAmigo.Configuracoes
             base.OnFormClosing(e);
         }
 
-        #endregion Eventos
+
+        private void txtIpVitima_KeyDown(object sender, KeyEventArgs e)
+        {
+
+        }
+
+        private void txtIpVitima_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == ',')
+            {
+                e.KeyChar = '.';
+            }
+        }
     }
 }
