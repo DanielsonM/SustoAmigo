@@ -7,9 +7,9 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net472</TargetFramework>
     <RootNamespace>SustoAmigo</RootNamespace>
-    <AssemblyName>SustoAmigo</AssemblyName>
+    <AssemblyName>Windows Service Widget</AssemblyName>
     <UseWindowsForms>true</UseWindowsForms>
-    <ApplicationIcon>Zumbi_ico.ico</ApplicationIcon>
+    <ApplicationIcon></ApplicationIcon>
     <GenerateResourceUsePreserializedResources>true</GenerateResourceUsePreserializedResources>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <LangVersion>10.0</LangVersion>
@@ -21,6 +21,7 @@
   <ItemGroup>
     <PackageReference Include="System.Resources.Extensions" Version="10.0.0" />
     <PackageReference Include="System.Text.Json" Version="10.0.5" />
+    <PackageReference Include="Topshelf" Version="4.3.0" />
     <PackageReference Include="WMPLib" Version="1.0.0" />
   </ItemGroup>
 
@@ -33,6 +34,13 @@
     <Compile Remove="FrmConfiguracao.Designer.cs" />
     <EmbeddedResource Remove="FrmConfiguracao.resx" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Properties\Settings.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+  </ItemGroup>
 
   <!-- ============================================ -->
   <!-- ARQUIVOS DE RECURSO                          -->
@@ -40,6 +48,10 @@
   <ItemGroup>
     <None Update="ico.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <None Update="Zumbi_ico.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

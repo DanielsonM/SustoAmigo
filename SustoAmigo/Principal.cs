@@ -1,17 +1,14 @@
-﻿using System;
+﻿using SustoAmigo.Interfaces;
+using System;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
-using SustoAmigo.Interfaces;
 
 namespace SustoAmigo
 {
     public partial class Principal : Form
     {
-
         private const int MILISSEGUNDO_POR_SEGUNDO = 1000;
-
-
 
         private readonly IMediaService _mediaService;
         private readonly IConfigService _configuracao;
@@ -20,8 +17,7 @@ namespace SustoAmigo
         private Timer _timerReset;
         private string _arquivoSomTemporario;
         private bool _disposed;
-
-
+        public bool ReiniciarAoFechar { get; set; }
 
         public Principal(IMediaService mediaService, IConfigService configuracao, RedeController redeController = null)
         {
@@ -32,8 +28,6 @@ namespace SustoAmigo
             InitializeComponent();
             Iniciar();
         }
-
-
 
         protected override void OnLoad(EventArgs e)
         {
@@ -48,6 +42,9 @@ namespace SustoAmigo
             LimparArquivoSomTemporario();
             _redeController?.PararServidor();
             base.OnFormClosing(e);
+
+            if (ReiniciarAoFechar)
+                System.Diagnostics.Process.Start(Application.ExecutablePath);
         }
 
         protected override void Dispose(bool disposing)
@@ -145,7 +142,7 @@ namespace SustoAmigo
                     pastas.Uploads, pastas.Sons, _configuracao.SomSelecionado);
 
                 ReproduzirSomComArquivoTemporario(caminhoSom, pastas.Sons);
-                
+
                 ExibirImagem(caminhoImagem);
 
                 IniciarTimerReset();
@@ -169,7 +166,7 @@ namespace SustoAmigo
 
         private void ExibirImagem(string caminhoImagem)
         {
-            if (!string.IsNullOrEmpty(caminhoImagem) || !File.Exists(caminhoImagem))
+            if (string.IsNullOrEmpty(caminhoImagem) || !File.Exists(caminhoImagem))
             {
                 picFoto.SizeMode = PictureBoxSizeMode.Zoom;
                 picFoto.Image = Properties.Resources.imgSusto;
@@ -182,7 +179,6 @@ namespace SustoAmigo
                 picFoto.SizeMode = PictureBoxSizeMode.Zoom;
                 picFoto.Image = new Bitmap(imagem);
                 picFoto.Visible = true;
-
             }
         }
 
@@ -250,6 +246,5 @@ namespace SustoAmigo
             _mediaService.PararSom();
             Hide();
         }
-
     }
 }

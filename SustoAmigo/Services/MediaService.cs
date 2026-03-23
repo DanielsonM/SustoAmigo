@@ -1,10 +1,8 @@
+using SustoAmigo.Interfaces;
 using System;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows.Forms;
-using SustoAmigo.Interfaces;
 using WMPLib;
 
 namespace SustoAmigo.Services
@@ -18,6 +16,10 @@ namespace SustoAmigo.Services
         private WindowsMediaPlayer _wmpPlayer;
         private string _arquivoTemporario;
         private bool _disposed;
+
+        private static readonly Lazy<MediaService> _i = new Lazy<MediaService>(() => new MediaService());
+
+        public static MediaService i => _i.Value;
 
         public async Task<string> CarregarImagemAsync(string pastaUploads, string pastaPadrao, string imagemSelecionada)
         {

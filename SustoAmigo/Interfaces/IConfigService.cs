@@ -1,5 +1,3 @@
-using System;
-
 namespace SustoAmigo.Interfaces
 {
     public interface IConfigService
@@ -12,7 +10,10 @@ namespace SustoAmigo.Interfaces
         string ImagemSelecionada { get; }
         string SomSelecionado { get; }
 
-        void Salvar(int intervalo, int tempoExibicao, bool modoRede, int porta, string ipServidor, string imagem, string som);
+        bool ReiniciarAoFechar { get; }
+
+        void Salvar(bool booReiniciarAoFechar, int intervalo, int tempoExibicao, bool modoRede, int porta, string ipServidor, string imagem, string som);
+
         void Carregar();
     }
 }

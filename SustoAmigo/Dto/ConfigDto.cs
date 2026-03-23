@@ -1,5 +1,4 @@
-﻿
-namespace SustoAmigo.Dto
+﻿namespace SustoAmigo.Dto
 {
     public class ConfigDto
     {
@@ -10,5 +9,6 @@ namespace SustoAmigo.Dto
         public string IpServidor { get; set; }
         public string ImagemSelecionada { get; set; }
         public string SomSelecionado { get; set; }
+        public bool booReiniciarAoFechar { get; set; }
     }
 }

@@ -23,14 +23,18 @@ namespace SustoAmigo
 
         public event Action OnReceberComando;
 
-        public RedeController() : this(new UploadHandler()) { }
+        private static readonly Lazy<RedeController> _i = new Lazy<RedeController>(() => new RedeController());
+
+        public static RedeController i => _i.Value;
+
+        public RedeController() : this(new UploadHandler())
+        {
+        }
 
         public RedeController(IUploadHandler uploadHandler)
         {
             _uploadHandler = uploadHandler;
         }
-
-        // ... (mantém os métodos IniciarServidor e IniciarServidorHttp iguais)
 
         private void ProcessarRequisicao(HttpListenerContext context)
         {
@@ -73,6 +77,7 @@ namespace SustoAmigo
                 Responder(context, 500, $"Erro ao processar comando: {ex.Message}");
             }
         }
+
         public void IniciarServidor(int porta)
         {
             Task.Run(() =>
@@ -135,7 +140,6 @@ namespace SustoAmigo
             });
         }
 
-  
         private void ProcessarConfiguracao(HttpListenerContext context)
         {
             try
@@ -152,7 +156,8 @@ namespace SustoAmigo
 
                     var valores = JsonSerializer.Deserialize<ConfigDto>(body);
 
-                    ConfiguracaoXml.Instancia.Salvar(
+                    ConfiguracaoXml.i.Salvar(
+                        valores.booReiniciarAoFechar,
                         valores.IntervaloExecucao,
                         valores.TempoExibicao,
                         valores.ModoRede,
@@ -171,7 +176,6 @@ namespace SustoAmigo
             }
         }
 
-
         private void ProcessarUpload(HttpListenerContext context, string path)
         {
             var contentType = context.Request.ContentType ?? string.Empty;
@@ -188,7 +192,7 @@ namespace SustoAmigo
                 return;
             }
 
-            if (path.StartsWith("/upload/imagem"))
+            if (path.StartsWith("/upload/photo"))
             {
                 var resultado = _uploadHandler.ProcessarUploadImagem(context.Request.InputStream, boundary);
                 ProcessarResultadoUpload(context, resultado, "Imagem");

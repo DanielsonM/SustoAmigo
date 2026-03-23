@@ -1,10 +1,9 @@
-﻿using System;
+﻿using SustoAmigo.Interfaces;
+using SustoAmigo.Services;
+using System;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
-using SustoAmigo.Interfaces;
-using SustoAmigo.Services;
-using WMPLib;
 
 namespace SustoAmigo.Configuracoes
 {
@@ -18,7 +17,7 @@ namespace SustoAmigo.Configuracoes
 
         public bool IniciadoPorConfiguracao { get; private set; }
 
-        public FrmConfiguracao() : this(ConfiguracaoXml.Instancia, new MediaService()) { }
+        public FrmConfiguracao() : this(ConfiguracaoXml.i, new MediaService()) { }
 
         public FrmConfiguracao(IConfigService configService, IMediaService mediaService)
         {
@@ -35,7 +34,7 @@ namespace SustoAmigo.Configuracoes
             CarregarConfiguracoes();
         }
 
-        private void CriarPastasPadrao()
+        public void CriarPastasPadrao()
         {
             if (!Directory.Exists(_pastaImagens))
                 Directory.CreateDirectory(_pastaImagens);
@@ -198,13 +197,12 @@ namespace SustoAmigo.Configuracoes
             var imagem = cmbImagens.SelectedItem?.ToString();
             var som = cmbSons.SelectedItem?.ToString();
 
-            _configService.Salvar(intervalo, tempoExibicao, modoRede, porta, ipServidor, imagem, som);
+            _configService.Salvar(false, intervalo, tempoExibicao, modoRede, porta, ipServidor, imagem, som);
 
             MessageBox.Show("Configura��es salvas com sucesso!");
             IniciadoPorConfiguracao = true;
             Close();
         }
-
 
         private void btnCarregarImagem_Click(object sender, EventArgs e)
         {
@@ -286,10 +284,8 @@ namespace SustoAmigo.Configuracoes
             base.OnFormClosing(e);
         }
 
-
         private void txtIpVitima_KeyDown(object sender, KeyEventArgs e)
         {
-
         }
 
         private void txtIpVitima_KeyPress(object sender, KeyPressEventArgs e)

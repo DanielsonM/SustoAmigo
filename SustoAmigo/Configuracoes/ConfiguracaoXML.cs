@@ -1,8 +1,8 @@
-﻿using System;
+﻿using SustoAmigo.Interfaces;
+using System;
 using System.IO;
 using System.Windows.Forms;
 using System.Xml.Linq;
-using SustoAmigo.Interfaces;
 
 namespace SustoAmigo.Configuracoes
 {
@@ -12,12 +12,20 @@ namespace SustoAmigo.Configuracoes
         private const int INTERVALO_PADRAO = 10;
         private const int TEMPO_EXIBICAO_PADRAO = 5;
         private const int PORTA_PADRAO = 5000;
-        private const string IP_SERVIDOR_PADRAO = "192.168.0.50";
+        private const string IP_SERVIDOR_PADRAO = "0.0.0.0";
 
-        private static readonly Lazy<ConfiguracaoXml> _instancia = new Lazy<ConfiguracaoXml>(() => new ConfiguracaoXml());
+        private readonly IConfigService _configService;
+        private readonly IMediaService _mediaService;
+
+        private bool _emReproducao;
+
+        private readonly string _pastaImagens = Path.Combine(Application.StartupPath, "Imagens");
+        private readonly string _pastaSons = Path.Combine(Application.StartupPath, "Sons");
+
+        private static readonly Lazy<ConfiguracaoXml> _i = new Lazy<ConfiguracaoXml>(() => new ConfiguracaoXml());
         private static string _caminhoArquivo = Path.Combine(Application.StartupPath, NOME_ARQUIVO_PADRAO);
 
-        public static ConfiguracaoXml Instancia => _instancia.Value;
+        public static ConfiguracaoXml i => _i.Value;
 
         public int IntervaloExecucao { get; private set; }
         public int TempoExibicao { get; private set; }
@@ -26,13 +34,15 @@ namespace SustoAmigo.Configuracoes
         public string IpServidor { get; private set; }
         public string ImagemSelecionada { get; private set; }
         public string SomSelecionado { get; private set; }
+        public bool ReiniciarAoFechar { get; set; }
 
         private ConfiguracaoXml() => Carregar();
 
-        public void Salvar(int intervalo, int tempoExibicao, bool modoRede, int porta, string ipServidor, string imagem, string som)
+        public void Salvar(bool booReiniciarAoFechar, int intervalo, int tempoExibicao, bool modoRede, int porta, string ipServidor, string imagem, string som)
         {
             var doc = new XDocument(
                 new XElement("Configuracao",
+                 new XElement("ReiniciarAoFechar", intervalo),
                     new XElement("IntervaloExecucao", intervalo),
                     new XElement("TempoExibicao", tempoExibicao),
                     new XElement("ModoRede", modoRede),
@@ -45,6 +55,7 @@ namespace SustoAmigo.Configuracoes
 
             doc.Save(_caminhoArquivo);
 
+            ReiniciarAoFechar = booReiniciarAoFechar;
             IntervaloExecucao = intervalo;
             TempoExibicao = tempoExibicao;
             ModoRede = modoRede;
@@ -66,6 +77,7 @@ namespace SustoAmigo.Configuracoes
                 var doc = XDocument.Load(_caminhoArquivo);
                 var root = doc.Root;
 
+                ReiniciarAoFechar = ObterValorBooleano(root, "ReiniciarAoFechar", false);
                 IntervaloExecucao = ObterValorInteiro(root, "IntervaloExecucao", INTERVALO_PADRAO);
                 TempoExibicao = ObterValorInteiro(root, "TempoExibicao", TEMPO_EXIBICAO_PADRAO);
                 ModoRede = ObterValorBooleano(root, "ModoRede", false);
@@ -83,10 +95,38 @@ namespace SustoAmigo.Configuracoes
             }
         }
 
+        public string ObterCaminhoSomSelecionado()
+        {
+            if (!string.IsNullOrEmpty(_configService.SomSelecionado))
+            {
+                var caminho = Path.Combine(_pastaSons, _configService.SomSelecionado);
+                if (File.Exists(caminho))
+                    return caminho;
+            }
+
+            if (Directory.Exists(_pastaSons))
+            {
+                var arquivos = Directory.GetFiles(_pastaSons, "*");
+                return arquivos.Length > 0 ? arquivos[0] : null;
+            }
+
+            return null;
+        }
+
+        public void CriarPastasPadrao()
+        {
+            if (!Directory.Exists(_pastaImagens))
+                Directory.CreateDirectory(_pastaImagens);
+
+            if (!Directory.Exists(_pastaSons))
+                Directory.CreateDirectory(_pastaSons);
+        }
+
         private void CriarArquivoPadrao()
         {
             var doc = new XDocument(
                 new XElement("Configuracao",
+                    new XElement("ReiniciarAoFechar", false),
                     new XElement("IntervaloExecucao", INTERVALO_PADRAO),
                     new XElement("TempoExibicao", TEMPO_EXIBICAO_PADRAO),
                     new XElement("ModoRede", false),
