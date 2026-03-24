@@ -64,43 +64,69 @@ namespace SustoAmigo.Services
             fimDados = 0;
 
             var boundaryBytes = Encoding.UTF8.GetBytes($"--{boundary}");
-            var inicioBoundary = Array.IndexOf(dados, boundaryBytes[0]);
-            var proximaBoundary = Array.IndexOf(dados, boundaryBytes[0], inicioBoundary + 1);
 
-            if (inicioBoundary < 0 || proximaBoundary < 0)
+            // Encontrar o primeiro boundary
+            int inicioBoundary = IndexOf(dados, boundaryBytes, 0);
+            if (inicioBoundary < 0)
                 return false;
 
-            var fimCabecalho = Array.IndexOf(dados, (byte)'\r');
+            // Encontrar o próximo boundary (fim da parte do arquivo)
+            int proximaBoundary = IndexOf(dados, boundaryBytes, inicioBoundary + boundaryBytes.Length);
+            if (proximaBoundary < 0)
+                return false;
+
+            // Procurar fim do cabeçalho (\r\n\r\n)
+            var headerEndPattern = Encoding.UTF8.GetBytes("\r\n\r\n");
+            int fimCabecalho = IndexOf(dados, headerEndPattern, inicioBoundary);
             if (fimCabecalho < 0)
                 return false;
 
-            cabecalho = Encoding.UTF8.GetString(dados, inicioBoundary, fimCabecalho - inicioBoundary);
+            // Extrair cabeçalho
+            cabecalho = Encoding.UTF8.GetString(dados, inicioBoundary + boundaryBytes.Length + 2, fimCabecalho - (inicioBoundary + boundaryBytes.Length + 2));
 
-            inicioDados = Array.IndexOf(dados, (byte)'\n', fimCabecalho) + 1;
-            inicioDados = Array.IndexOf(dados, (byte)'\r', inicioDados) + 2;
+            // Dados começam logo após o cabeçalho
+            inicioDados = fimCabecalho + headerEndPattern.Length;
 
-            fimDados = Array.LastIndexOf(dados, boundaryBytes[0]);
-            fimDados = Array.LastIndexOf(dados, (byte)'\n', fimDados - 2) - 1;
+            // Dados terminam antes do próximo boundary
+            fimDados = proximaBoundary - 2; // remove \r\n antes do boundary
 
-            return inicioDados < fimDados;
+            // Extrair os bytes do arquivo
+            int tamanho = fimDados - inicioDados;
+            if (tamanho <= 0)
+                return false;
+
+            dadosArquivo = new byte[tamanho];
+            Array.Copy(dados, inicioDados, dadosArquivo, 0, tamanho);
+
+            return true;
         }
+
+        // Função auxiliar para procurar sequência de bytes
+        private int IndexOf(byte[] buffer, byte[] pattern, int startIndex = 0)
+        {
+            for (int i = startIndex; i <= buffer.Length - pattern.Length; i++)
+            {
+                bool match = true;
+                for (int j = 0; j < pattern.Length; j++)
+                {
+                    if (buffer[i + j] != pattern[j])
+                    {
+                        match = false;
+                        break;
+                    }
+                }
+                if (match) return i;
+            }
+            return -1;
+        }
+
 
         private string ExtrairNomeArquivo(string cabecalho)
         {
-            var contentDisposition = cabecalho
-                .Split(new[] { "\r\n" }, StringSplitOptions.None)
-                .FirstOrDefault(l => l.Contains("Content-Disposition:"));
-
-            if (string.IsNullOrEmpty(contentDisposition))
-                return null;
-
-            contentDisposition = contentDisposition
-                .Replace("Content-Disposition: form-data;", "")
-                .Trim();
-
-            var match = Regex.Match(contentDisposition, "filename=\"([^\"]+)\"");
-            return match.Success ? match.Groups[1].Value : null;
+            var match = Regex.Match(cabecalho, @"filename=""(?<nome>[^""]+)""");
+            return match.Success ? match.Groups["nome"].Value : null;
         }
+
 
         private string SalvarArquivo(byte[] bytesArquivo, string extensao)
         {

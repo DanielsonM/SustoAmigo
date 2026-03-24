@@ -197,14 +197,14 @@ namespace SustoAmigo
                 var resultado = _uploadHandler.ProcessarUploadImagem(context.Request.InputStream, boundary);
                 ProcessarResultadoUpload(context, resultado, "Imagem");
             }
-            else if (path.StartsWith("/upload/som"))
+            else if (path.StartsWith("/upload/audio"))
             {
                 var resultado = _uploadHandler.ProcessarUploadSom(context.Request.InputStream, boundary);
-                ProcessarResultadoUpload(context, resultado, "Som");
+                ProcessarResultadoUpload(context, resultado, "audio");
             }
             else
             {
-                Responder(context, 400, "Endpoint de upload inválido. Use /upload/imagem ou /upload/som");
+                Responder(context, 400, "Endpoint de upload inválido. Use /upload/imagem ou /upload/audio");
             }
         }
 
