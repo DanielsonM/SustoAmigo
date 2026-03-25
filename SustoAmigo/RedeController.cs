@@ -164,7 +164,9 @@ namespace SustoAmigo
                         valores.Porta,
                         valores.IpServidor,
                         valores.ImagemSelecionada,
-                        valores.SomSelecionado
+                        valores.SomSelecionado,
+                        valores.ApenasSom,
+                        valores.ApenasImagem
                     );
                 }
 

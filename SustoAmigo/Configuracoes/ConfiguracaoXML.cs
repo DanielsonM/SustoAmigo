@@ -35,10 +35,12 @@ namespace SustoAmigo.Configuracoes
         public string ImagemSelecionada { get; private set; }
         public string SomSelecionado { get; private set; }
         public bool ReiniciarAoFechar { get; set; }
+        public bool ApenasSom { get; set; }
+        public bool ApenasImagem { get; set; }
 
         private ConfiguracaoXml() => Carregar();
 
-        public void Salvar(bool booReiniciarAoFechar, int intervalo, int tempoExibicao, bool modoRede, int porta, string ipServidor, string imagem, string som)
+        public void Salvar(bool booReiniciarAoFechar, int intervalo, int tempoExibicao, bool modoRede, int porta, string ipServidor, string imagem, string som, bool ApenasSom, bool ApenasImagem)
         {
             var doc = new XDocument(
                 new XElement("Configuracao",
@@ -49,20 +51,24 @@ namespace SustoAmigo.Configuracoes
                     new XElement("Porta", porta),
                     new XElement("IpServidor", ipServidor ?? string.Empty),
                     new XElement("ImagemSelecionada", imagem ?? string.Empty),
-                    new XElement("SomSelecionado", som ?? string.Empty)
+                    new XElement("SomSelecionado", som ?? string.Empty),
+                    new XElement("ApenasSom", som ?? string.Empty),
+                    new XElement("ApenasImagem", som ?? string.Empty)
                 )
             );
 
             doc.Save(_caminhoArquivo);
 
-            ReiniciarAoFechar = booReiniciarAoFechar;
-            IntervaloExecucao = intervalo;
-            TempoExibicao = tempoExibicao;
-            ModoRede = modoRede;
-            Porta = porta;
-            IpServidor = ipServidor;
-            ImagemSelecionada = imagem;
-            SomSelecionado = som;
+            this.ReiniciarAoFechar = booReiniciarAoFechar;
+            this.IntervaloExecucao = intervalo;
+            this.TempoExibicao = tempoExibicao;
+            this.ModoRede = modoRede;
+            this.Porta = porta;
+            this.IpServidor = ipServidor;
+            this.ImagemSelecionada = imagem;
+            this.SomSelecionado = som;
+            this.ApenasSom = ApenasSom;
+            this.ApenasImagem = ApenasImagem;
         }
 
         public void Carregar()
