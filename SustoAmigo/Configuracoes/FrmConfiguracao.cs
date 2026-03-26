@@ -197,7 +197,7 @@ namespace SustoAmigo.Configuracoes
             var imagem = cmbImagens.SelectedItem?.ToString();
             var som = cmbSons.SelectedItem?.ToString();
 
-            _configService.Salvar(false, intervalo, tempoExibicao, modoRede, porta, ipServidor, imagem, som);
+          //  _configService.Salvar(false, intervalo, tempoExibicao, modoRede, porta, ipServidor, imagem, som, apenasSom, ApenasImagem);
 
             MessageBox.Show("Configura��es salvas com sucesso!");
             IniciadoPorConfiguracao = true;

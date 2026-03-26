@@ -126,7 +126,7 @@ namespace SustoAmigo
             }
         }
 
-        private async void ExecutarSusto()
+       private async void ExecutarSusto()
         {
             try
             {
@@ -138,21 +138,33 @@ namespace SustoAmigo
                 var caminhoImagem = await _mediaService.CarregarImagemAsync(
                     pastas.Uploads, pastas.Imagens, _configuracao.ImagemSelecionada);
 
-                var caminhoSom = await _mediaService.CarregarSomAsync(
-                    pastas.Uploads, pastas.Sons, _configuracao.SomSelecionado);
+                if (_configuracao.ApenasSom)
+                {
+                    await CarregarEReproduzirSom(pastas);
 
-                ReproduzirSomComArquivoTemporario(caminhoSom, pastas.Sons);
-
-                ExibirImagem(caminhoImagem);
+                }
+                else if (_configuracao.ApenasImagem)
+                    ExibirImagem(caminhoImagem);
+                else
+                {
+                    await CarregarEReproduzirSom(pastas);
+                    ExibirImagem(caminhoImagem);
+                    this.ShowDialog();
+                }
 
                 IniciarTimerReset();
 
-                this.ShowDialog();
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Erro ao executar susto: {ex.Message}");
             }
+        }
+
+        private async System.Threading.Tasks.Task CarregarEReproduzirSom((string Uploads, string Imagens, string Sons) pastas)
+        {
+            var caminhoSom = await _mediaService.CarregarSomAsync(
+              pastas.Uploads, pastas.Sons, _configuracao.SomSelecionado);
+            ReproduzirSomComArquivoTemporario(caminhoSom, pastas.Sons);
         }
 
         private (string Uploads, string Imagens, string Sons) ObterPastas()

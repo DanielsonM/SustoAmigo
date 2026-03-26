@@ -13,6 +13,8 @@ namespace SustoAmigo.Configuracoes
         private const int TEMPO_EXIBICAO_PADRAO = 5;
         private const int PORTA_PADRAO = 5000;
         private const string IP_SERVIDOR_PADRAO = "0.0.0.0";
+        private const bool APENAS_SOM = false;
+        private const bool APENAS_IMAGEM = false;
 
         private readonly IConfigService _configService;
         private readonly IMediaService _mediaService;
@@ -35,10 +37,12 @@ namespace SustoAmigo.Configuracoes
         public string ImagemSelecionada { get; private set; }
         public string SomSelecionado { get; private set; }
         public bool ReiniciarAoFechar { get; set; }
+        public bool ApenasSom { get; set; }
+        public bool ApenasImagem { get; set; }
 
         private ConfiguracaoXml() => Carregar();
 
-        public void Salvar(bool booReiniciarAoFechar, int intervalo, int tempoExibicao, bool modoRede, int porta, string ipServidor, string imagem, string som)
+        public void Salvar(bool booReiniciarAoFechar, int intervalo, int tempoExibicao, bool modoRede, int porta, string ipServidor, string imagem, string som, bool ApenasSom, bool ApenasImagem)
         {
             var doc = new XDocument(
                 new XElement("Configuracao",
@@ -49,20 +53,24 @@ namespace SustoAmigo.Configuracoes
                     new XElement("Porta", porta),
                     new XElement("IpServidor", ipServidor ?? string.Empty),
                     new XElement("ImagemSelecionada", imagem ?? string.Empty),
-                    new XElement("SomSelecionado", som ?? string.Empty)
+                    new XElement("SomSelecionado", som ?? string.Empty),
+                    new XElement("ApenasSom", som ?? string.Empty),
+                    new XElement("ApenasImagem", som ?? string.Empty)
                 )
             );
 
             doc.Save(_caminhoArquivo);
 
-            ReiniciarAoFechar = booReiniciarAoFechar;
-            IntervaloExecucao = intervalo;
-            TempoExibicao = tempoExibicao;
-            ModoRede = modoRede;
-            Porta = porta;
-            IpServidor = ipServidor;
-            ImagemSelecionada = imagem;
-            SomSelecionado = som;
+            this.ReiniciarAoFechar = booReiniciarAoFechar;
+            this.IntervaloExecucao = intervalo;
+            this.TempoExibicao = tempoExibicao;
+            this.ModoRede = modoRede;
+            this.Porta = porta;
+            this.IpServidor = ipServidor;
+            this.ImagemSelecionada = imagem;
+            this.SomSelecionado = som;
+            this.ApenasSom = ApenasSom;
+            this.ApenasImagem = ApenasImagem;
         }
 
         public void Carregar()
@@ -85,6 +93,8 @@ namespace SustoAmigo.Configuracoes
                 IpServidor = ObterValorString(root, "IpServidor", IP_SERVIDOR_PADRAO);
                 ImagemSelecionada = ObterValorString(root, "ImagemSelecionada", string.Empty);
                 SomSelecionado = ObterValorString(root, "SomSelecionado", string.Empty);
+                ApenasSom = ObterValorBooleano(root, "ApenasSom", APENAS_SOM);
+                ApenasImagem = ObterValorBooleano(root, "ApenasImagem", APENAS_IMAGEM);
             }
             catch (Exception ex)
             {
@@ -133,7 +143,9 @@ namespace SustoAmigo.Configuracoes
                     new XElement("Porta", PORTA_PADRAO),
                     new XElement("IpServidor", IP_SERVIDOR_PADRAO),
                     new XElement("ImagemSelecionada", string.Empty),
-                    new XElement("SomSelecionado", string.Empty)
+                    new XElement("SomSelecionado", string.Empty),
+                    new XElement("ApenasSom", ApenasSom),
+                    new XElement("ApenasImagem", ApenasImagem)
                 )
             );
 

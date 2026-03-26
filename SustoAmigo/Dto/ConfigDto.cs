@@ -10,5 +10,7 @@
         public string ImagemSelecionada { get; set; }
         public string SomSelecionado { get; set; }
         public bool booReiniciarAoFechar { get; set; }
+        public bool ApenasSom { get; set; }
+        public bool ApenasImagem { get; set; }
     }
 }
