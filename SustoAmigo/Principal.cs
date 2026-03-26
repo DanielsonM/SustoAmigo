@@ -149,11 +149,11 @@ namespace SustoAmigo
                 {
                     await CarregarEReproduzirSom(pastas);
                     ExibirImagem(caminhoImagem);
+                    this.ShowDialog();
                 }
 
                 IniciarTimerReset();
 
-                this.ShowDialog();
             }
             catch (Exception ex)
             {

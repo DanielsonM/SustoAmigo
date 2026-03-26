@@ -13,6 +13,8 @@ namespace SustoAmigo.Configuracoes
         private const int TEMPO_EXIBICAO_PADRAO = 5;
         private const int PORTA_PADRAO = 5000;
         private const string IP_SERVIDOR_PADRAO = "0.0.0.0";
+        private const bool APENAS_SOM = false;
+        private const bool APENAS_IMAGEM = false;
 
         private readonly IConfigService _configService;
         private readonly IMediaService _mediaService;
@@ -91,6 +93,8 @@ namespace SustoAmigo.Configuracoes
                 IpServidor = ObterValorString(root, "IpServidor", IP_SERVIDOR_PADRAO);
                 ImagemSelecionada = ObterValorString(root, "ImagemSelecionada", string.Empty);
                 SomSelecionado = ObterValorString(root, "SomSelecionado", string.Empty);
+                ApenasSom = ObterValorBooleano(root, "ApenasSom", APENAS_SOM);
+                ApenasImagem = ObterValorBooleano(root, "ApenasImagem", APENAS_IMAGEM);
             }
             catch (Exception ex)
             {
@@ -139,7 +143,9 @@ namespace SustoAmigo.Configuracoes
                     new XElement("Porta", PORTA_PADRAO),
                     new XElement("IpServidor", IP_SERVIDOR_PADRAO),
                     new XElement("ImagemSelecionada", string.Empty),
-                    new XElement("SomSelecionado", string.Empty)
+                    new XElement("SomSelecionado", string.Empty),
+                    new XElement("ApenasSom", ApenasSom),
+                    new XElement("ApenasImagem", ApenasImagem)
                 )
             );
 
