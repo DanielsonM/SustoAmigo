@@ -12,8 +12,9 @@ namespace SustoAmigo.Interfaces
         bool ReiniciarAoFechar { get; }
         bool ApenasSom { get; }
         bool ApenasImagem { get; }
+        bool UsarMilesegundos { get; }
 
-        void Salvar(bool booReiniciarAoFechar, int intervalo, int tempoExibicao, bool modoRede, int porta, string ipServidor, string imagem, string som, bool ApenasSom, bool ApenasImagem);
+        void Salvar(bool booReiniciarAoFechar, int intervalo, int tempoExibicao, bool modoRede, int porta, string ipServidor, string imagem, string som, bool ApenasSom, bool ApenasImagem, bool UsarMilesegundos);
 
         void Carregar();
     }

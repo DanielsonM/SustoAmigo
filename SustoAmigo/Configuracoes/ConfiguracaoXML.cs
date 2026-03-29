@@ -15,6 +15,7 @@ namespace SustoAmigo.Configuracoes
         private const string IP_SERVIDOR_PADRAO = "0.0.0.0";
         private const bool APENAS_SOM = false;
         private const bool APENAS_IMAGEM = false;
+        private const bool USAR_MILESEGUNDOS = false;
 
         private readonly IConfigService _configService;
         private readonly IMediaService _mediaService;
@@ -39,10 +40,11 @@ namespace SustoAmigo.Configuracoes
         public bool ReiniciarAoFechar { get; set; }
         public bool ApenasSom { get; set; }
         public bool ApenasImagem { get; set; }
+        public bool UsarMilesegundos { get; set; }
 
         private ConfiguracaoXml() => Carregar();
 
-        public void Salvar(bool booReiniciarAoFechar, int intervalo, int tempoExibicao, bool modoRede, int porta, string ipServidor, string imagem, string som, bool ApenasSom, bool ApenasImagem)
+        public void Salvar(bool booReiniciarAoFechar, int intervalo, int tempoExibicao, bool modoRede, int porta, string ipServidor, string imagem, string som, bool ApenasSom, bool ApenasImagem, bool UsarMilesegundos)
         {
             var doc = new XDocument(
                 new XElement("Configuracao",
@@ -55,7 +57,8 @@ namespace SustoAmigo.Configuracoes
                     new XElement("ImagemSelecionada", imagem ?? string.Empty),
                     new XElement("SomSelecionado", som ?? string.Empty),
                     new XElement("ApenasSom", som ?? string.Empty),
-                    new XElement("ApenasImagem", som ?? string.Empty)
+                    new XElement("ApenasImagem", som ?? string.Empty),
+                    new XElement("UsarMileSegundis", UsarMilesegundos)
                 )
             );
 
@@ -71,6 +74,7 @@ namespace SustoAmigo.Configuracoes
             this.SomSelecionado = som;
             this.ApenasSom = ApenasSom;
             this.ApenasImagem = ApenasImagem;
+            this.UsarMilesegundos = UsarMilesegundos;
         }
 
         public void Carregar()
@@ -95,6 +99,7 @@ namespace SustoAmigo.Configuracoes
                 SomSelecionado = ObterValorString(root, "SomSelecionado", string.Empty);
                 ApenasSom = ObterValorBooleano(root, "ApenasSom", APENAS_SOM);
                 ApenasImagem = ObterValorBooleano(root, "ApenasImagem", APENAS_IMAGEM);
+                UsarMilesegundos = ObterValorBooleano(root, "UsarMilesegundos", USAR_MILESEGUNDOS);
             }
             catch (Exception ex)
             {
@@ -139,13 +144,14 @@ namespace SustoAmigo.Configuracoes
                     new XElement("ReiniciarAoFechar", false),
                     new XElement("IntervaloExecucao", INTERVALO_PADRAO),
                     new XElement("TempoExibicao", TEMPO_EXIBICAO_PADRAO),
-                    new XElement("ModoRede", false),
+                    new XElement("ModoRede", true),
                     new XElement("Porta", PORTA_PADRAO),
                     new XElement("IpServidor", IP_SERVIDOR_PADRAO),
                     new XElement("ImagemSelecionada", string.Empty),
                     new XElement("SomSelecionado", string.Empty),
                     new XElement("ApenasSom", ApenasSom),
-                    new XElement("ApenasImagem", ApenasImagem)
+                    new XElement("ApenasImagem", ApenasImagem),
+                    new XElement("UsarMileSegundos", UsarMilesegundos)
                 )
             );
 
@@ -168,5 +174,6 @@ namespace SustoAmigo.Configuracoes
         {
             return root.Element(elemento)?.Value ?? valorPadrao;
         }
+
     }
 }

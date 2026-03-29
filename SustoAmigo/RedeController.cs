@@ -166,7 +166,8 @@ namespace SustoAmigo
                         valores.ImagemSelecionada,
                         valores.SomSelecionado,
                         valores.ApenasSom,
-                        valores.ApenasImagem
+                        valores.ApenasImagem,
+                        valores.UsarMilesegundos
                     );
                 }
 

@@ -111,7 +111,12 @@ namespace SustoAmigo
         private void IniciarTimerReset()
         {
             _timerReset = new Timer();
-            _timerReset.Interval = _configuracao.TempoExibicao * MILISSEGUNDO_POR_SEGUNDO;
+
+            if (_configuracao.UsarMilesegundos)
+                _timerReset.Interval = _configuracao.TempoExibicao * 100;
+            else
+                _timerReset.Interval = _configuracao.TempoExibicao * MILISSEGUNDO_POR_SEGUNDO;
+
             _timerReset.Tick += TimerReset_Tick;
             _timerReset.Start();
         }
@@ -126,7 +131,7 @@ namespace SustoAmigo
             }
         }
 
-       private async void ExecutarSusto()
+        private async void ExecutarSusto()
         {
             try
             {
@@ -144,18 +149,21 @@ namespace SustoAmigo
 
                 }
                 else if (_configuracao.ApenasImagem)
+                {
                     ExibirImagem(caminhoImagem);
+                    this.Show();
+                }
                 else
                 {
                     await CarregarEReproduzirSom(pastas);
                     ExibirImagem(caminhoImagem);
-                    this.ShowDialog();
+                    this.Show();
                 }
 
                 IniciarTimerReset();
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
             }
         }

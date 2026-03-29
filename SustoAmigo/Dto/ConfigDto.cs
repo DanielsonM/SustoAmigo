@@ -12,5 +12,6 @@
         public bool booReiniciarAoFechar { get; set; }
         public bool ApenasSom { get; set; }
         public bool ApenasImagem { get; set; }
+        public bool UsarMilesegundos { get; set; }
     }
 }
