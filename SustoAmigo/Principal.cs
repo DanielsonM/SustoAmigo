@@ -75,7 +75,7 @@ namespace SustoAmigo
         private void ConfigurarModoRede()
         {
             if (_redeController == null)
-                throw new InvalidOperationException("RedeController � necess�rio para o modo rede.");
+                throw new InvalidOperationException("RedeController necess�rio para o modo rede.");
 
             _redeController.OnReceberComando += AoReceberComando;
             _redeController.IniciarServidor(_configuracao.Porta);

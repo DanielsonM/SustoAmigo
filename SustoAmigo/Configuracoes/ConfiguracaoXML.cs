@@ -13,14 +13,11 @@ namespace SustoAmigo.Configuracoes
         private const int TEMPO_EXIBICAO_PADRAO = 5;
         private const int PORTA_PADRAO = 5000;
         private const string IP_SERVIDOR_PADRAO = "0.0.0.0";
-        private const bool APENAS_SOM = false;
+        private const bool APENAS_SOM = true;
         private const bool APENAS_IMAGEM = false;
         private const bool USAR_MILESEGUNDOS = false;
 
         private readonly IConfigService _configService;
-        private readonly IMediaService _mediaService;
-
-        private bool _emReproducao;
 
         private readonly string _pastaImagens = Path.Combine(Application.StartupPath, "Imagens");
         private readonly string _pastaSons = Path.Combine(Application.StartupPath, "Sons");

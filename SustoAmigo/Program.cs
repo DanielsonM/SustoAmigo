@@ -10,9 +10,6 @@ namespace SustoAmigo
 {
     internal static class Program
     {
-        /// <summary>
-        /// Ponto de entrada principal para o aplicativo.
-        /// </summary>
         [STAThread]
         private static void Main(string[] args)
         {
@@ -30,15 +27,14 @@ namespace SustoAmigo
                 var root = doc.Root;
                 int porta = ConfiguracaoXml.ObterValorInteiro(root, "Porta", 5000);
                 ConfiguracaoXml.i.CriarPastasPadrao();
-                //ConfiguracaoXml.i.ObterCaminhoSomSelecionado();
                 redeController.IniciarServidorHttp(porta);
             }
 
-           // bool reiniciarAoFechar = !args.Contains("--no-restart");
+            bool reiniciarAoFechar = !args.Contains("--no-restart");
 
             Application.Run(new Principal(new MediaService(), configuracao, redeController)
             {
-               // ReiniciarAoFechar = reiniciarAoFechar
+                ReiniciarAoFechar = reiniciarAoFechar
             });
         }
     }
