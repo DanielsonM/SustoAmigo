@@ -13,6 +13,16 @@ namespace SustoAmigo.Services
         private static readonly string[] EXTENSOES_IMAGEM = { ".jpg", ".jpeg", ".png", ".gif", ".bmp" };
         private static readonly string[] EXTENSOES_SOM = { ".mp3", ".wav", ".wma", ".ogg", ".m4a" };
         private const string PASTA_UPLOADS = "uploads";
+        private static readonly string LOG_FILE = Path.Combine(Application.StartupPath, "upload_log.txt");
+
+        private static void Log(string mensagem)
+        {
+            try
+            {
+                File.AppendAllText(LOG_FILE, $"[{DateTime.Now:HH:mm:ss.fff}] {mensagem}\r\n");
+            }
+            catch { }
+        }
 
         public (bool Sucesso, string CaminhoArquivo, string Erro) ProcessarUploadImagem(Stream inputStream, string boundary)
         {
@@ -21,10 +31,10 @@ namespace SustoAmigo.Services
 
         public (bool Sucesso, string CaminhoArquivo, string Erro) ProcessarUploadSom(Stream inputStream, string boundary)
         {
-            System.Diagnostics.Debug.WriteLine("[UploadHandler] ProcessarUploadSom INICIADO");
-            System.Diagnostics.Debug.WriteLine($"[UploadHandler] Boundary: {boundary}");
+            Log($"=== ProcessarUploadSom INICIADO ===");
+            Log($"Boundary: '{boundary}'");
             var resultado = ProcessarUpload(inputStream, boundary, EXTENSOES_SOM, "áudio");
-            System.Diagnostics.Debug.WriteLine($"[UploadHandler] ProcessarUploadSom FINALIZADO - Sucesso: {resultado.Sucesso}, Erro: {resultado.Erro}");
+            Log($"ProcessarUploadSom FINALIZADO - Sucesso: {resultado.Sucesso}, Erro: {resultado.Erro}");
             return resultado;
         }
 
@@ -33,51 +43,66 @@ namespace SustoAmigo.Services
         {
             try
             {
-                System.Diagnostics.Debug.WriteLine($"[UploadHandler] ProcessarUpload INICIADO - Tipo: {tipoArquivo}");
-                
+                Log($"ProcessarUpload INICIADO - Tipo: {tipoArquivo}");
+                Log($"Boundary recebido: '{boundary}'");
+
+                // Ler o stream completamente antes de processar
                 var memory = new MemoryStream();
                 inputStream.CopyTo(memory);
                 var dados = memory.ToArray();
 
-                System.Diagnostics.Debug.WriteLine($"[UploadHandler] Dados recebidos: {dados.Length} bytes");
+                Log($"Dados recebidos: {dados.Length} bytes");
+
+                if (string.IsNullOrEmpty(boundary))
+                {
+                    Log("Erro: Boundary vazio ou nulo");
+                    return (false, null, "Boundary não encontrado");
+                }
 
                 if (!ExtrairDadosMultipart(dados, boundary, out var cabecalho, out var dadosArquivo, out var inicioDados, out var fimDados))
                 {
-                    System.Diagnostics.Debug.WriteLine("[UploadHandler] Falha ao extrair dados multipart");
+                    Log("Falha ao extrair dados multipart");
+                    Log($"Boundary usado: '{boundary}'");
+                    Log($"Tamanho dos dados: {dados.Length}");
                     return (false, null, "Formato multipart inválido");
                 }
 
-                System.Diagnostics.Debug.WriteLine($"[UploadHandler] Cabeçalho: {cabecalho}");
+                Log($"Cabeçalho: {cabecalho}");
 
                 var nomeArquivo = ExtrairNomeArquivo(cabecalho);
-                System.Diagnostics.Debug.WriteLine($"[UploadHandler] Nome do arquivo extraído: {nomeArquivo}");
-                
+                Log($"Nome do arquivo extraído: {nomeArquivo}");
+
                 if (string.IsNullOrEmpty(nomeArquivo))
+                {
+                    Log("Nome do arquivo não encontrado");
                     return (false, null, "Nome do arquivo não encontrado");
+                }
 
                 var extensao = Path.GetExtension(nomeArquivo).ToLower();
-                System.Diagnostics.Debug.WriteLine($"[UploadHandler] Extensão: {extensao}");
-                System.Diagnostics.Debug.WriteLine($"[UploadHandler] Extensões permitidas: {string.Join(", ", extensoesPermitidas)}");
-                
+                Log($"Extensão: {extensao}");
+                Log($"Extensões permitidas: {string.Join(", ", extensoesPermitidas)}");
+
                 if (!extensoesPermitidas.Contains(extensao))
                 {
-                    System.Diagnostics.Debug.WriteLine($"[UploadHandler] Extensão não permitida!");
+                    Log("Extensão não permitida!");
                     return (false, null, $"Formato de {tipoArquivo} não suportado");
                 }
 
                 var bytesArquivo = new byte[fimDados - inicioDados];
                 Array.Copy(dados, inicioDados, bytesArquivo, 0, bytesArquivo.Length);
-                System.Diagnostics.Debug.WriteLine($"[UploadHandler] Bytes do arquivo: {bytesArquivo.Length}");
+                Log($"Bytes do arquivo: {bytesArquivo.Length}");
 
                 var caminhoArquivo = SalvarArquivo(bytesArquivo, extensao);
-                System.Diagnostics.Debug.WriteLine($"[UploadHandler] Arquivo salvo em: {caminhoArquivo}");
-                
+                Log($"Arquivo salvo em: {caminhoArquivo}");
+                Log($"=== ProcessarUpload FINALIZADO COM SUCESSO ===");
+
                 return (true, caminhoArquivo, null);
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[UploadHandler] EXCEÇÃO: {ex.Message}");
-                System.Diagnostics.Debug.WriteLine($"[UploadHandler] Stack: {ex.StackTrace}");
+                Log($"EXCEÇÃO: {ex.Message}");
+                Log($"Stack: {ex.StackTrace}");
+                Log($"InnerException: {ex.InnerException?.Message}");
                 return (false, null, $"Erro ao processar upload: {ex.Message}");
             }
         }
