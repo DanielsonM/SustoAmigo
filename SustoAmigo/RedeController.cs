@@ -155,6 +155,54 @@ namespace SustoAmigo
 
         private void ProcessarConfiguracao(HttpListenerContext context)
         {
+            // GET - Retornar configurações atuais
+            if (context.Request.HttpMethod == "GET")
+            {
+                RetornarConfiguracao(context);
+                return;
+            }
+
+            // POST - Salvar configurações
+            if (context.Request.HttpMethod == "POST")
+            {
+                SalvarConfiguracao(context);
+                return;
+            }
+
+            Responder(context, 405, "Método não permitido. Use GET ou POST.");
+        }
+
+        private void RetornarConfiguracao(HttpListenerContext context)
+        {
+            try
+            {
+                ConfiguracaoXml.i.Carregar();
+                var configDto = new ConfigDto
+                {
+                    IntervaloExecucao = ConfiguracaoXml.i.IntervaloExecucao,
+                    TempoExibicao = ConfiguracaoXml.i.TempoExibicao,
+                    ModoRede = ConfiguracaoXml.i.ModoRede,
+                    Porta = ConfiguracaoXml.i.Porta,
+                    IpServidor = ConfiguracaoXml.i.IpServidor,
+                    ImagemSelecionada = ConfiguracaoXml.i.ImagemSelecionada,
+                    SomSelecionado = ConfiguracaoXml.i.SomSelecionado,
+                    booReiniciarAoFechar = ConfiguracaoXml.i.ReiniciarAoFechar,
+                    ApenasSom = ConfiguracaoXml.i.ApenasSom,
+                    ApenasImagem = ConfiguracaoXml.i.ApenasImagem,
+                    UsarMilesegundos = ConfiguracaoXml.i.UsarMilesegundos
+                };
+
+                var json = JsonSerializer.Serialize(configDto);
+                ResponderComJson(context, 200, json);
+            }
+            catch (Exception ex)
+            {
+                Responder(context, 500, $"Erro ao carregar configuração: {ex.Message}");
+            }
+        }
+
+        private void SalvarConfiguracao(HttpListenerContext context)
+        {
             try
             {
                 using (var reader = new StreamReader(context.Request.InputStream))
@@ -253,6 +301,17 @@ namespace SustoAmigo
             {
                 Responder(context, 400, $"Erro no upload: {resultado.Erro}");
             }
+        }
+
+        private void ResponderComJson(HttpListenerContext context, int statusCode, string json)
+        {
+            context.Response.StatusCode = statusCode;
+            context.Response.ContentType = "application/json";
+            using (var writer = new StreamWriter(context.Response.OutputStream))
+            {
+                writer.Write(json);
+            }
+            context.Response.Close();
         }
 
         private void Responder(HttpListenerContext context, int statusCode, string mensagem)

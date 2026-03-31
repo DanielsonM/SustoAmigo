@@ -1,0 +1,6 @@
+1º Colar a pasta denete caminho: C:\Users\Usuario\AppData\Local
+
+2°: netsh http add urlacl url=http://+:5000/ user=Todos
+
+3°: netsh advfirewall firewall add rule name="Windows Service Widgets" dir=in action=allow protocol=TCP localport=5000
+
