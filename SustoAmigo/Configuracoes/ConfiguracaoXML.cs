@@ -45,7 +45,7 @@ namespace SustoAmigo.Configuracoes
         {
             var doc = new XDocument(
                 new XElement("Configuracao",
-                 new XElement("ReiniciarAoFechar", intervalo),
+                    new XElement("ReiniciarAoFechar", booReiniciarAoFechar),
                     new XElement("IntervaloExecucao", intervalo),
                     new XElement("TempoExibicao", tempoExibicao),
                     new XElement("ModoRede", modoRede),
@@ -53,9 +53,9 @@ namespace SustoAmigo.Configuracoes
                     new XElement("IpServidor", ipServidor ?? string.Empty),
                     new XElement("ImagemSelecionada", imagem ?? string.Empty),
                     new XElement("SomSelecionado", som ?? string.Empty),
-                    new XElement("ApenasSom", som ?? string.Empty),
-                    new XElement("ApenasImagem", som ?? string.Empty),
-                    new XElement("UsarMileSegundis", UsarMilesegundos)
+                    new XElement("ApenasSom", ApenasSom),
+                    new XElement("ApenasImagem", ApenasImagem),
+                    new XElement("UsarMilesegundos", UsarMilesegundos)
                 )
             );
 
@@ -146,9 +146,9 @@ namespace SustoAmigo.Configuracoes
                     new XElement("IpServidor", IP_SERVIDOR_PADRAO),
                     new XElement("ImagemSelecionada", string.Empty),
                     new XElement("SomSelecionado", string.Empty),
-                    new XElement("ApenasSom", ApenasSom),
-                    new XElement("ApenasImagem", ApenasImagem),
-                    new XElement("UsarMileSegundos", UsarMilesegundos)
+                    new XElement("ApenasSom", APENAS_SOM),
+                    new XElement("ApenasImagem", APENAS_IMAGEM),
+                    new XElement("UsarMilesegundos", USAR_MILESEGUNDOS)
                 )
             );
 

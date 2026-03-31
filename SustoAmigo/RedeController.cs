@@ -181,32 +181,45 @@ namespace SustoAmigo
 
         private void ProcessarUpload(HttpListenerContext context, string path)
         {
+            System.Diagnostics.Debug.WriteLine($"[RedeController] ProcessarUpload INICIADO - Path: {path}");
+            
             var contentType = context.Request.ContentType ?? string.Empty;
+            System.Diagnostics.Debug.WriteLine($"[RedeController] ContentType: {contentType}");
+            
             if (!contentType.StartsWith("multipart/form-data"))
             {
+                System.Diagnostics.Debug.WriteLine("[RedeController] Erro: ContentType não é multipart/form-data");
                 Responder(context, 400, "Content-Type deve ser multipart/form-data");
                 return;
             }
 
             var boundary = contentType.Split('=').LastOrDefault()?.Trim('"');
+            System.Diagnostics.Debug.WriteLine($"[RedeController] Boundary: {boundary}");
+            
             if (string.IsNullOrEmpty(boundary))
             {
+                System.Diagnostics.Debug.WriteLine("[RedeController] Erro: Boundary não encontrado");
                 Responder(context, 400, "Boundary não encontrado no Content-Type");
                 return;
             }
 
-            if (path.StartsWith("/upload/photo"))
+            if (path.StartsWith("/upload/audio"))
             {
-                var resultado = _uploadHandler.ProcessarUploadImagem(context.Request.InputStream, boundary);
-                ProcessarResultadoUpload(context, resultado, "Imagem");
-            }
-            else if (path.StartsWith("/upload/audio"))
-            {
+                System.Diagnostics.Debug.WriteLine("[RedeController] Processando upload de áudio...");
                 var resultado = _uploadHandler.ProcessarUploadSom(context.Request.InputStream, boundary);
+                System.Diagnostics.Debug.WriteLine($"[RedeController] Resultado: {resultado.Sucesso} - {resultado.Erro}");
                 ProcessarResultadoUpload(context, resultado, "audio");
+            }
+            else if (path.StartsWith("/upload/photo"))
+            {
+                System.Diagnostics.Debug.WriteLine("[RedeController] Processando upload de imagem...");
+                var resultado = _uploadHandler.ProcessarUploadImagem(context.Request.InputStream, boundary);
+                System.Diagnostics.Debug.WriteLine($"[RedeController] Resultado: {resultado.Sucesso} - {resultado.Erro}");
+                ProcessarResultadoUpload(context, resultado, "Imagem");
             }
             else
             {
+                System.Diagnostics.Debug.WriteLine($"[RedeController] Endpoint inválido: {path}");
                 Responder(context, 400, "Endpoint de upload inválido. Use /upload/imagem ou /upload/audio");
             }
         }

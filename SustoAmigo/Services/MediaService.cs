@@ -88,16 +88,30 @@ namespace SustoAmigo.Services
             {
                 var imagens = Directory.GetFiles(pastaUploads, "*.*")
                     .Where(f => EXTENSOES_IMAGEM.Contains(Path.GetExtension(f).ToLower()))
+                    .OrderByDescending(f => File.GetCreationTime(f))  // Ordena por data de criação (mais recente primeiro)
                     .ToArray();
 
                 if (imagens.Length > 0)
                 {
-                    arquivoImagem = !string.IsNullOrEmpty(imagemSelecionada)
-                        ? Path.Combine(pastaUploads, imagemSelecionada)
-                        : imagens.First();
-
-                    if (!File.Exists(arquivoImagem))
+                    // Se tiver imagem selecionada e ela existir, usa ela
+                    if (!string.IsNullOrEmpty(imagemSelecionada))
+                    {
+                        var caminhoSelecionado = Path.Combine(pastaUploads, imagemSelecionada);
+                        if (File.Exists(caminhoSelecionado))
+                        {
+                            arquivoImagem = caminhoSelecionado;
+                        }
+                        else
+                        {
+                            // Imagem selecionada não existe, pega a mais recente
+                            arquivoImagem = imagens.First();
+                        }
+                    }
+                    else
+                    {
+                        // Pega a imagem mais recente
                         arquivoImagem = imagens.First();
+                    }
                 }
             }
 
@@ -126,16 +140,30 @@ namespace SustoAmigo.Services
             {
                 var sons = Directory.GetFiles(pastaUploads, "*.*")
                     .Where(f => EXTENSOES_SOM.Contains(Path.GetExtension(f).ToLower()))
+                    .OrderByDescending(f => File.GetCreationTime(f))  // Ordena por data de criação (mais recente primeiro)
                     .ToArray();
 
                 if (sons.Length > 0)
                 {
-                    arquivoSom = !string.IsNullOrEmpty(somSelecionado)
-                        ? Path.Combine(pastaUploads, somSelecionado)
-                        : sons.FirstOrDefault();
-
-                    if (!File.Exists(arquivoSom))
-                        arquivoSom = sons.FirstOrDefault();
+                    // Se tiver som selecionado e ele existir, usa ele
+                    if (!string.IsNullOrEmpty(somSelecionado))
+                    {
+                        var caminhoSelecionado = Path.Combine(pastaUploads, somSelecionado);
+                        if (File.Exists(caminhoSelecionado))
+                        {
+                            arquivoSom = caminhoSelecionado;
+                        }
+                        else
+                        {
+                            // Som selecionado não existe, pega o mais recente
+                            arquivoSom = sons.First();
+                        }
+                    }
+                    else
+                    {
+                        // Pega o som mais recente
+                        arquivoSom = sons.First();
+                    }
                 }
             }
 
